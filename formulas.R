@@ -99,7 +99,8 @@ my_moment <- function(x, r, c) {
 my_ordinary_moment <- function(x, r) {
   sum(x^r) / length(x)
 }
-
+#RELATION BETWEEN ORDINAY MOMENT AND CENTRAL MOMENT: 
+#|| m1 = mu || m2 = σ ^2 + mu^2 || m_3 = mu_3 + 3*m_2*mu - 2*mu^3 || mu_4 = m_4 - 4*m_3*mu + 6*m_2*mu^2 - 3*mu^4 ||
 # Central moment of order r
 my_central_moment <- function(x, r) {
   mu <- mean(x)
