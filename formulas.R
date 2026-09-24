@@ -1,944 +1,630 @@
-
-#===============================================================
-#                                                              |
-#                 CHAPTER 1                                    |
-#        DESCRIPTIVE STATISTICS OF ONE VARIABLE                |
-#                                                              |
-#===============================================================
-
 # ============================================================
-# 1. MEASURES OF CENTRAL TENDENCY
+# CHAPTER 1 - DESCRIPTIVE STATISTICS OF ONE VARIABLE
 # ============================================================
 
-# Arithmetic mean
-my_mean <- function(x) {
-  sum(x) / length(x)
-}
+# 1. CENTRAL TENDENCY
 
-# Weighted mean
-my_weighted_mean <- function(x, w) {
-  sum(x * w) / sum(w)
-}
+# x: data vector
+my_mean <- function(x) sum(x) / length(x)
 
-# Mean using frequencies
-my_mean_freq <- function(x, n) {
-  sum(x * n) / sum(n)
-}
+# x: values, w: weights
+my_weighted_mean <- function(x, w) sum(x * w) / sum(w)
 
-# Quadratic mean / RMS
-my_rms <- function(x) {
-  sqrt(sum(x^2) / length(x))
-}
+# x: values, n: frequencies
+my_mean_freq <- function(x, n) sum(x * n) / sum(n)
 
-# RMS using frequencies
-my_rms_freq <- function(x, n) {
-  sqrt(sum(n * x^2) / sum(n))
-}
+# x: data vector
+my_rms <- function(x) sqrt(sum(x^2) / length(x))
 
-# ============================================================
-# 2. MEASURES OF POSITION
-# ============================================================
+# x: values, n: frequencies
+my_rms_freq <- function(x, n) sqrt(sum(n * x^2) / sum(n))
 
-# Median
-# R:
-# median(x)
 
-# c = 0.25 -> Q1
-# c = 0.50 -> Q2 / median
-# c = 0.75 -> Q3
+# 2. POSITION
 
+# x: data vector, c: quantile (0.25, 0.5, 0.75...)
 my_quantile <- function(x, c) {
-  
   x <- sort(x)
   N <- length(x)
-  
   cN <- c * N
   E <- floor(cN)
   D <- cN - E
-  
-  if (D != 0) {
-    x[E + 1]
-  } else {
-    (x[E] + x[E + 1]) / 2
-  }
+  if (D != 0) x[E + 1] else (x[E] + x[E + 1]) / 2
 }
 
-# ============================================================
-# 3. MEASURES OF DISPERSION
-# ============================================================
 
-# Range
-my_range <- function(x) {
-  max(x) - min(x)
-}
+# 3. DISPERSION
 
-# Interquartile range
-my_iqr <- function(x) {
-  my_quantile(x, 0.75) - my_quantile(x, 0.25)
-}
+# x: data vector
+my_range <- function(x) max(x) - min(x)
 
-# Interpercentile range P99 - P1
+# x: data vector
+my_iqr <- function(x) my_quantile(x, 0.75) - my_quantile(x, 0.25)
+
+# x: data vector
 my_interpercentile_range <- function(x) {
   my_quantile(x, 0.99) - my_quantile(x, 0.01)
 }
 
-# ------------------------------------------------------------
-# Mean deviation
-# MD(p) = sum |xi - p| * ni / N
-# ------------------------------------------------------------
-
+# x: data vector, p: reference value
 my_mean_deviation <- function(x, p) {
   sum(abs(x - p)) / length(x)
 }
 
+# x: values, n: frequencies, p: reference value
 my_mean_deviation_freq <- function(x, n, p) {
   sum(n * abs(x - p)) / sum(n)
 }
 
-# ------------------------------------------------------------
-# Mean squared error
-# MSE(p) = sum ni(xi-p)^2 / N
-# ------------------------------------------------------------
+# x: data vector, p: reference value
+my_mse <- function(x, p) sum((x - p)^2) / length(x)
 
-my_mse <- function(x, p) {
-  sum((x - p)^2) / length(x)
-}
-
+# x: values, n: frequencies, p: reference value
 my_mse_freq <- function(x, n, p) {
   sum(n * (x - p)^2) / sum(n)
 }
 
-# ------------------------------------------------------------
-# Population variance
-# ------------------------------------------------------------
-
+# x: data vector; population variance
 my_variance <- function(x) {
   mu <- mean(x)
   sum((x - mu)^2) / length(x)
 }
 
+# x: values, n: frequencies
 my_variance_freq <- function(x, n) {
   N <- sum(n)
   mu <- sum(x * n) / N
   sum(n * (x - mu)^2) / N
 }
 
-# Variance from:
-# sum(ni*xi^2), N and mean
-#
-# sigma^2 = sum(ni*xi^2)/N - mu^2
-
+# sum_x2_n: sum(n*x^2), N: total frequency, mu: mean
 my_variance_from_sums <- function(sum_x2_n, N, mu) {
   sum_x2_n / N - mu^2
 }
 
-# Variance from second ordinary moment
-#
-# sigma^2 = m2 - mu^2
+# m2: second ordinary moment, mu: mean
+my_variance_from_m2 <- function(m2, mu) m2 - mu^2
 
-my_variance_from_m2 <- function(m2, mu) {
-  m2 - mu^2
-}
+# x: data vector
+my_sd <- function(x) sqrt(my_variance(x))
 
-# ------------------------------------------------------------
-# Standard deviation
-# ------------------------------------------------------------
+# variance: already calculated variance
+my_sd_from_variance <- function(variance) sqrt(variance)
 
-my_sd <- function(x) {
-  sqrt(my_variance(x))
-}
-
-my_sd_from_variance <- function(variance) {
-  sqrt(variance)
-}
-
-# ------------------------------------------------------------
-# Sample variance
-# ------------------------------------------------------------
-
+# x: data vector; sample variance
 my_sample_variance <- function(x) {
   xbar <- mean(x)
   sum((x - xbar)^2) / (length(x) - 1)
 }
 
-my_sample_sd <- function(x) {
-  sqrt(my_sample_variance(x))
-}
+# x: data vector
+my_sample_sd <- function(x) sqrt(my_sample_variance(x))
 
-# ============================================================
+
 # 4. COEFFICIENT OF VARIATION
-# ============================================================
 
-# CV = sigma / |mu|
+# x: data vector
+my_cv <- function(x) my_sd(x) / abs(mean(x))
 
-my_cv <- function(x) {
-  my_sd(x) / abs(mean(x))
-}
+# mu: mean, sigma: standard deviation
+my_cv_from_values <- function(mu, sigma) sigma / abs(mu)
 
-my_cv_from_values <- function(mu, sigma) {
-  sigma / abs(mu)
-}
+# x: data vector; CV in %
+my_cv_percent <- function(x) 100 * my_cv(x)
 
-my_cv_percent <- function(x) {
-  100 * my_cv(x)
-}
-
+# mu: mean, sigma: standard deviation
 my_cv_percent_from_values <- function(mu, sigma) {
   100 * sigma / abs(mu)
 }
 
-# ============================================================
+
 # 5. STANDARDISATION
-# ============================================================
 
-# Z = (X - mu) / sigma
+# x: value, mu: mean, sigma: SD
+my_z <- function(x, mu, sigma) (x - mu) / sigma
 
-my_z <- function(x, mu, sigma) {
-  (x - mu) / sigma
-}
+# z: standardised value, mu: mean, sigma: SD
+my_x_from_z <- function(z, mu, sigma) mu + z * sigma
 
-# Recover X:
-# X = mu + Z*sigma
 
-my_x_from_z <- function(z, mu, sigma) {
-  mu + z * sigma
-}
-
-# ============================================================
 # 6. MOMENTS
-# ============================================================
 
-# Moment of order r about c
-#
-# m_r(c) = sum((xi-c)^r) / N
-
+# x: data, r: order, c: reference point
 my_moment <- function(x, r, c) {
   sum((x - c)^r) / length(x)
 }
 
+# x: values, n: frequencies, r: order, c: reference point
 my_moment_freq <- function(x, n, r, c) {
   sum(n * (x - c)^r) / sum(n)
 }
 
-# Ordinary moment
-#
-# m_r = sum(xi^r) / N
-
+# x: data, r: order
 my_ordinary_moment <- function(x, r) {
   sum(x^r) / length(x)
 }
 
+# x: values, n: frequencies, r: order
 my_ordinary_moment_freq <- function(x, n, r) {
   sum(n * x^r) / sum(n)
 }
 
-# Central moment
-#
-# mu_r = sum((xi-mu)^r) / N
-
+# x: data, r: order
 my_central_moment <- function(x, r) {
   mu <- mean(x)
   sum((x - mu)^r) / length(x)
 }
 
+# x: values, n: frequencies, r: order
 my_central_moment_freq <- function(x, n, r) {
   N <- sum(n)
   mu <- sum(x * n) / N
   sum(n * (x - mu)^r) / N
 }
 
-# ============================================================
+
 # 7. ORDINARY / CENTRAL MOMENTS
-# ============================================================
 
-# m1 = mu
+# m2: second ordinary moment, mu: mean
+my_central_moment_2 <- function(m2, mu) m2 - mu^2
 
-# mu2 = m2 - mu^2
-
-my_central_moment_2 <- function(m2, mu) {
-  m2 - mu^2
-}
-
-# mu3 = m3 - 3*m2*mu + 2*mu^3
-
+# m3: third ordinary moment, m2: second moment, mu: mean
 my_central_moment_3 <- function(m3, m2, mu) {
   m3 - 3 * m2 * mu + 2 * mu^3
 }
 
-# mu4 = m4 - 4*m3*mu + 6*m2*mu^2 - 3*mu^4
-
+# m4,m3,m2: ordinary moments, mu: mean
 my_central_moment_4 <- function(m4, m3, m2, mu) {
   m4 - 4 * m3 * mu + 6 * m2 * mu^2 - 3 * mu^4
 }
 
-# ============================================================
-# 8. MODE
-# ============================================================
 
+# 8. MODE
+
+# x: data vector
 my_mode <- function(x) {
-  
-  frequencies <- table(x)
-  max_frequency <- max(frequencies)
-  
-  modes <- as.numeric(
-    names(frequencies)[frequencies == max_frequency]
-  )
-  
-  if (length(modes) == length(frequencies)) {
-    return(NULL)
-  }
-  
-  modes
+  f <- table(x)
+  m <- as.numeric(names(f)[f == max(f)])
+  if (length(m) == length(f)) return(NULL)
+  m
 }
 
-# ============================================================
-# 9. SKEWNESS
-# ============================================================
-# Pearson:
-# AP = (mu - Mo) / sigma
 
+# 9. SKEWNESS
+
+# mu: mean, mode: mode, sigma: SD
 my_pearson_skew <- function(mu, mode, sigma) {
   (mu - mode) / sigma
 }
 
-# Fisher:
-# g1 = mu3 / sigma^3
-
+# x: data vector
 my_fisher_skew <- function(x) {
   mu3 <- my_central_moment(x, 3)
   sigma <- my_sd(x)
-  
   mu3 / sigma^3
 }
 
+# mu3: third central moment, sigma: SD
 my_fisher_skew_from_values <- function(mu3, sigma) {
   mu3 / sigma^3
 }
 
-# ============================================================
-# 10. KURTOSIS
-# ============================================================
-# Fisher:
-# g2 = mu4 / sigma^4 - 3
 
+# 10. KURTOSIS
+
+# x: data vector
 my_kurtosis <- function(x) {
   mu4 <- my_central_moment(x, 4)
   sigma <- my_sd(x)
-  
   mu4 / sigma^4 - 3
 }
 
+# mu4: fourth central moment, sigma: SD
 my_kurtosis_from_values <- function(mu4, sigma) {
   mu4 / sigma^4 - 3
 }
 
-#===============================================================
-#                                                              |
-#                 CHAPTER 2                                    |
-#             STATISTICAL MODELLING                            |
-#                                                              |
-#===============================================================
 
 # ============================================================
+# CHAPTER 2 - STATISTICAL MODELLING
+# ============================================================
+
 # 1. BIVARIATE / JOINT DATA
-# ============================================================
-# Joint frequency table from paired observations
-#
-# x = values of X
-# y = values of Y
 
-my_joint_frequency <- function(x, y) {
-  table(x, y)
-}
+# x,y: paired observations
+my_joint_frequency <- function(x, y) table(x, y)
 
-# Relative joint frequency
+# x,y: paired observations
 my_joint_relative_frequency <- function(x, y) {
   table(x, y) / length(x)
 }
 
-# Marginal frequencies of X
-my_marginal_x <- function(F) {
-  rowSums(F)
-}
+# F: joint frequency table
+my_marginal_x <- function(F) rowSums(F)
 
-# Marginal frequencies of Y
-my_marginal_y <- function(F) {
-  colSums(F)
-}
+# F: joint frequency table
+my_marginal_y <- function(F) colSums(F)
+
+# F: joint frequency table
+my_total_frequency <- function(F) sum(F)
 
 
-# Total number of observations
-my_total_frequency <- function(F) {
-  sum(F)
-}
-
-# ============================================================
 # 2. CONDITIONAL DISTRIBUTIONS
-# ============================================================
-# Distribution of Y conditioned on X = a
-#
-# Returns relative frequencies
 
+# F: joint table, x_index: row corresponding to X value
 my_y_given_x <- function(F, x_index) {
   F[x_index, ] / sum(F[x_index, ])
 }
 
-# Distribution of X conditioned on Y = b
-#
-# Returns relative frequencies
-
+# F: joint table, y_index: column corresponding to Y value
 my_x_given_y <- function(F, y_index) {
   F[, y_index] / sum(F[, y_index])
 }
 
-# Conditional mean of Y given X = a
-
+# y: Y values, F: joint table, x_index: X row
 my_mean_y_given_x <- function(y, F, x_index) {
-  frequencies <- F[x_index, ]
-  sum(y * frequencies) / sum(frequencies)
+  f <- F[x_index, ]
+  sum(y * f) / sum(f)
 }
 
-# Conditional mean of X given Y = b
-
+# x: X values, F: joint table, y_index: Y column
 my_mean_x_given_y <- function(x, F, y_index) {
-  frequencies <- F[, y_index]
-  sum(x * frequencies) / sum(frequencies)
+  f <- F[, y_index]
+  sum(x * f) / sum(f)
 }
 
-# ============================================================
+
 # 3. INDEPENDENCE
-# ============================================================
 
-# Expected frequencies under independence
-#
-# Eij = ni. * n.j / N
-
+# F: joint frequency table
 my_expected_frequencies <- function(F) {
-  
-  row_totals <- rowSums(F)
-  col_totals <- colSums(F)
+  rx <- rowSums(F)
+  cy <- colSums(F)
   N <- sum(F)
-  
-  outer(row_totals, col_totals) / N
+  outer(rx, cy) / N
 }
 
-# Check independence
-#
-# Two variables are independent if:
-# nij = ni. * n.j / N
-
+# F: joint frequency table
 my_independence <- function(F, tolerance = 1e-10) {
-  
-  expected <- my_expected_frequencies(F)
-  
-  all(abs(F - expected) < tolerance)
+  E <- my_expected_frequencies(F)
+  all(abs(F - E) < tolerance)
 }
 
-# ============================================================
+
 # 4. COVARIANCE
-# ============================================================
 
-# Population covariance
-
+# x,y: paired observations
 my_covariance <- function(x, y) {
-  
-  mean_x <- mean(x)
-  mean_y <- mean(y)
-  
-  sum((x - mean_x) * (y - mean_y)) / length(x)
+  mx <- mean(x)
+  my <- mean(y)
+  sum((x - mx) * (y - my)) / length(x)
 }
 
-# Covariance using frequencies
-#
-# Cov(X,Y) = sum[nij(xi-xbar)(yj-ybar)] / N
-
+# x,y: class values, F: joint frequency table
 my_covariance_freq <- function(x, y, F) {
-  
   N <- sum(F)
-  
-  mean_x <- sum(rowSums(F) * x) / N
-  mean_y <- sum(colSums(F) * y) / N
-  
+  mx <- sum(rowSums(F) * x) / N
+  my <- sum(colSums(F) * y) / N
   total <- 0
   
   for (i in seq_along(x)) {
     for (j in seq_along(y)) {
-      total <- total +
-        F[i, j] * (x[i] - mean_x) * (y[j] - mean_y)
+      total <- total + F[i,j] * (x[i] - mx) * (y[j] - my)
     }
   }
-  
   total / N
 }
 
-# Covariance from moments
-#
-# Cov(X,Y) = m11 - mx*my
-
+# m11: E(XY), mx: mean X, my: mean Y
 my_covariance_from_moments <- function(m11, mx, my) {
   m11 - mx * my
 }
 
-# ============================================================
-# 5. CORRELATION
-# ============================================================
-# Pearson correlation coefficient
-#
-# r = Cov(X,Y) / (sx * sy)
 
+# 5. CORRELATION
+
+# x,y: paired observations
 my_correlation <- function(x, y) {
-  my_covariance(x, y) /
-    (my_sd(x) * my_sd(y))
+  my_covariance(x, y) / (my_sd(x) * my_sd(y))
 }
 
-# Correlation when covariance and SDs are already given
-
+# cov_xy: covariance, sigma_x/y: standard deviations
 my_correlation_from_values <- function(cov_xy, sigma_x, sigma_y) {
   cov_xy / (sigma_x * sigma_y)
 }
 
-# ============================================================
-# 6. SIMPLE LINEAR REGRESSION
-# ============================================================
-# Regression of Y on X:
-#
-# y = a + bx
-#
-# b = Cov(X,Y) / Var(X)
-# a = ybar - b*xbar
 
+# 6. SIMPLE LINEAR REGRESSION
+
+# x,y: paired observations; returns intercept and slope of Y/X
 my_regression_y_on_x <- function(x, y) {
-  
   b <- my_covariance(x, y) / my_variance(x)
   a <- mean(y) - b * mean(x)
-  
   c(intercept = a, slope = b)
 }
 
-# Regression of X on Y:
-#
-# x = a + by
-
+# x,y: paired observations; returns intercept and slope of X/Y
 my_regression_x_on_y <- function(x, y) {
-  
   b <- my_covariance(x, y) / my_variance(y)
   a <- mean(x) - b * mean(y)
-  
   c(intercept = a, slope = b)
 }
 
-# Regression coefficients from summary information
-
+# cov_xy: covariance, variance_x: variance of X
 my_slope_y_on_x <- function(cov_xy, variance_x) {
   cov_xy / variance_x
 }
 
+# cov_xy: covariance, variance_y: variance of Y
 my_slope_x_on_y <- function(cov_xy, variance_y) {
   cov_xy / variance_y
 }
 
-
-# Intercept Y on X
+# mean_x/y: means, slope: regression slope
 my_intercept_y_on_x <- function(mean_x, mean_y, slope) {
   mean_y - slope * mean_x
 }
 
-# Intercept X on Y
+# mean_x/y: means, slope: regression slope
 my_intercept_x_on_y <- function(mean_x, mean_y, slope) {
   mean_x - slope * mean_y
 }
 
-# ============================================================
+
 # 7. REGRESSION PREDICTIONS
-# ============================================================
-# Given y = a + bx
 
-my_predict_y <- function(x, a, b) {
-  a + b * x
-}
+# x: X value, a: intercept, b: Y/X slope
+my_predict_y <- function(x, a, b) a + b * x
+
+# y: Y value, a: intercept, b: X/Y slope
+my_predict_x <- function(y, a, b) a + b * y
 
 
-# Given x = a + by
-
-my_predict_x <- function(y, a, b) {
-  a + b * y
-}
-
-# ============================================================
 # 8. REGRESSION USING r
-# ============================================================
-# b(Y/X) = r * sy / sx
 
+# r: correlation, sigma_x/y: SDs
 my_slope_y_on_x_from_r <- function(r, sigma_x, sigma_y) {
   r * sigma_y / sigma_x
 }
 
-# b(X/Y) = r * sx / sy
-
+# r: correlation, sigma_x/y: SDs
 my_slope_x_on_y_from_r <- function(r, sigma_x, sigma_y) {
   r * sigma_x / sigma_y
 }
 
-# ============================================================
-# 9. REGRESSION RELATIONSHIPS
-# ============================================================
-# r^2 = b * b'
-#
-# b  = slope Y/X
-# b' = slope X/Y
 
+# 9. REGRESSION RELATIONSHIPS
+
+# b: Y/X slope, b_prime: X/Y slope
 my_r_from_regression_slopes <- function(b, b_prime) {
-  
-  r_squared <- b * b_prime
-  
-  if (r_squared < 0) {
-    return(NA)
-  }
-  
-  sign(b) * sqrt(r_squared)
+  r2 <- b * b_prime
+  if (r2 < 0) return(NA)
+  sign(b) * sqrt(r2)
 }
 
-# Check whether two proposed regression slopes
-# can belong to the same bivariate data set
-
+# b,b_prime: two regression slopes
 my_valid_regression_slopes <- function(b, b_prime) {
   b * b_prime >= 0 && b * b_prime <= 1
 }
 
-# ============================================================
-# 10. REGRESSION LINES MUST CROSS AT THE CENTRE OF GRAVITY
-# ============================================================
 
-# If:
-#
-# Y/X: y = a + bx
-# X/Y: x = a2 + b2*y
-#
-# The centre of gravity is:
-# (mean_x, mean_y)
+# 10. CENTRE OF GRAVITY
 
+# mean_x, mean_y: means of X and Y
 my_centre_of_gravity <- function(mean_x, mean_y) {
   c(x = mean_x, y = mean_y)
 }
 
-# ============================================================
-# 11. MSE OF LINEAR REGRESSION
-# ============================================================
 
-# MSE = Var(Y) - b^2 Var(X)
+# 11. REGRESSION MSE
 
+# variance_y: Var(Y), slope: Y/X slope, variance_x: Var(X)
 my_regression_mse <- function(variance_y, slope, variance_x) {
   variance_y - slope^2 * variance_x
 }
 
-# Alternative:
-#
-# MSE = Var(Y)(1-r^2)
-
+# variance_y: Var(Y), r: correlation
 my_regression_mse_from_r <- function(variance_y, r) {
   variance_y * (1 - r^2)
 }
 
-# Root mean squared error
-
+# variance_y: Var(Y), slope: Y/X slope, variance_x: Var(X)
 my_rmse_regression <- function(variance_y, slope, variance_x) {
-  sqrt(my_regression_mse(
-    variance_y,
-    slope,
-    variance_x
-  ))
+  sqrt(my_regression_mse(variance_y, slope, variance_x))
 }
 
-# ============================================================
+
 # 12. COEFFICIENT OF DETERMINATION
-# ============================================================
 
-# R^2 = r^2
+# r: correlation
+my_r_squared <- function(r) r^2
 
-my_r_squared <- function(r) {
-  r^2
-}
 
-# ============================================================
 # 13. VARIANCE DECOMPOSITION
-# ============================================================
 
-# Var(Y) = MSE + Var(Y_est)
-
+# variance_y: Var(Y), mse: regression MSE
 my_explained_variance <- function(variance_y, mse) {
   variance_y - mse
 }
 
-
-# Var(Y_est) = b^2 Var(X)
-
+# slope: Y/X slope, variance_x: Var(X)
 my_variance_y_est <- function(slope, variance_x) {
   slope^2 * variance_x
 }
 
-# ============================================================
-# 14. SPEARMAN CORRELATION
-# ============================================================
 
-# Spearman correlation using ranks
+# 14. SPEARMAN
 
+# x,y: paired observations
 my_spearman <- function(x, y) {
   cor(rank(x), rank(y))
 }
 
-# ============================================================
+
 # 15. LOGARITHMIC REGRESSION
-# ============================================================
 
-# Model:
-#
-# y = a + b ln(x)
-
+# x,y: observations; model y = a + b*ln(x)
 my_log_regression <- function(x, y) {
-  
   model <- lm(y ~ log(x))
-  
   coefficients(model)
 }
 
-
-# Prediction from logarithmic model
-
+# x: new X value, model: logarithmic regression model
 my_predict_log <- function(x, model) {
   predict(model, newdata = data.frame(x = x))
 }
 
-# ============================================================
-# 16. CONTINGENCY TABLE / CHI-SQUARE
-# ============================================================
-# Chi-square statistic
-#
-# chi^2 = sum((O-E)^2/E)
 
+# 16. CONTINGENCY TABLE / CHI-SQUARE
+
+# F: observed frequency table
 my_chi_square <- function(F) {
-  
-  expected <- my_expected_frequencies(F)
-  
-  sum((F - expected)^2 / expected)
+  E <- my_expected_frequencies(F)
+  sum((F - E)^2 / E)
 }
 
-# Contingency coefficient
-#
-# C = sqrt(chi^2 / (chi^2 + N))
-
+# chi_square: chi-square statistic, N: total observations
 my_contingency_coefficient <- function(chi_square, N) {
   sqrt(chi_square / (chi_square + N))
 }
 
-# Calculate both at once
-
+# F: observed frequency table
 my_contingency_analysis <- function(F) {
-  
   N <- sum(F)
   chi2 <- my_chi_square(F)
   C <- my_contingency_coefficient(chi2, N)
-  
-  c(
-    chi_square = chi2,
-    contingency_coefficient = C
-  )
+  c(chi_square = chi2, contingency_coefficient = C)
 }
 
-# ============================================================
-# 17. GROUPED BIVARIATE DATA
-# ============================================================
-# If X and Y are grouped into intervals,
-# use class marks.
 
+# 17. GROUPED BIVARIATE DATA
+
+# lower, upper: class limits
 my_class_mark <- function(lower, upper) {
   (lower + upper) / 2
 }
 
-# Marginal mean of X from bivariate frequency table
-
+# x: X class marks, F: joint frequency table
 my_bivariate_mean_x <- function(x, F) {
-  
   N <- sum(F)
   nx <- rowSums(F)
-  
   sum(x * nx) / N
 }
 
-# Marginal mean of Y
-
+# y: Y class marks, F: joint frequency table
 my_bivariate_mean_y <- function(y, F) {
-  
   N <- sum(F)
   ny <- colSums(F)
-  
   sum(y * ny) / N
 }
 
-# Variance of X from bivariate table
-
+# x: X class marks, F: joint frequency table
 my_bivariate_variance_x <- function(x, F) {
-  
   N <- sum(F)
   nx <- rowSums(F)
-  
-  mu_x <- sum(x * nx) / N
-  
-  sum(nx * (x - mu_x)^2) / N
+  mx <- sum(x * nx) / N
+  sum(nx * (x - mx)^2) / N
 }
 
-# Variance of Y from bivariate table
-
+# y: Y class marks, F: joint frequency table
 my_bivariate_variance_y <- function(y, F) {
-  
   N <- sum(F)
   ny <- colSums(F)
-  
-  mu_y <- sum(y * ny) / N
-  
-  sum(ny * (y - mu_y)^2) / N
+  my <- sum(y * ny) / N
+  sum(ny * (y - my)^2) / N
 }
 
-
-# Covariance from grouped bivariate table
-
+# x,y: class marks, F: joint frequency table
 my_bivariate_covariance <- function(x, y, F) {
-  
   N <- sum(F)
-  
-  mu_x <- my_bivariate_mean_x(x, F)
-  mu_y <- my_bivariate_mean_y(y, F)
-  
+  mx <- my_bivariate_mean_x(x, F)
+  my <- my_bivariate_mean_y(y, F)
   total <- 0
   
   for (i in seq_along(x)) {
     for (j in seq_along(y)) {
-      
-      total <- total +
-        F[i, j] *
-        (x[i] - mu_x) *
-        (y[j] - mu_y)
+      total <- total + F[i,j] * (x[i] - mx) * (y[j] - my)
     }
   }
-  
   total / N
 }
 
-# ============================================================
-# 18. REGRESSION FROM GROUPED BIVARIATE DATA
-# ============================================================
 
+# 18. REGRESSION FROM GROUPED BIVARIATE DATA
+
+# x,y: class marks, F: joint frequency table
 my_bivariate_regression_y_on_x <- function(x, y, F) {
-  
   cov_xy <- my_bivariate_covariance(x, y, F)
   var_x <- my_bivariate_variance_x(x, F)
-  
   b <- cov_xy / var_x
-  
-  mean_x <- my_bivariate_mean_x(x, F)
-  mean_y <- my_bivariate_mean_y(y, F)
-  
-  a <- mean_y - b * mean_x
-  
+  mx <- my_bivariate_mean_x(x, F)
+  my <- my_bivariate_mean_y(y, F)
+  a <- my - b * mx
   c(intercept = a, slope = b)
 }
 
+# x,y: class marks, F: joint frequency table
 my_bivariate_regression_x_on_y <- function(x, y, F) {
-  
   cov_xy <- my_bivariate_covariance(x, y, F)
   var_y <- my_bivariate_variance_y(y, F)
-  
   b <- cov_xy / var_y
-  
-  mean_x <- my_bivariate_mean_x(x, F)
-  mean_y <- my_bivariate_mean_y(y, F)
-  
-  a <- mean_x - b * mean_y
-  
+  mx <- my_bivariate_mean_x(x, F)
+  my <- my_bivariate_mean_y(y, F)
+  a <- mx - b * my
   c(intercept = a, slope = b)
 }
 
-# ============================================================
-# 19. MULTIPLE LINEAR REGRESSION
-# ============================================================
-# Model:
-# z = a0 + a1*x + a2*y
 
+# 19. MULTIPLE LINEAR REGRESSION
+
+# x,y: predictors, z: dependent variable
 my_multiple_regression <- function(x, y, z) {
   lm(z ~ x + y)
 }
 
-
-# Get coefficients
-
+# x,y: predictors, z: dependent variable
 my_multiple_coefficients <- function(x, y, z) {
-  
-  model <- lm(z ~ x + y)
-  
-  coefficients(model)
+  coefficients(lm(z ~ x + y))
 }
 
-
-# Predictions
-
+# x,y: predictors, z: dependent variable
 my_multiple_predictions <- function(x, y, z) {
-  
-  model <- lm(z ~ x + y)
-  
-  predict(model)
+  predict(lm(z ~ x + y))
 }
 
 
-# ============================================================
 # 20. SSE
-# ============================================================
 
-# Sum of Squared Errors
-
+# actual: observed values, predicted: fitted values
 my_sse <- function(actual, predicted) {
   sum((actual - predicted)^2)
 }
 
-
-# SSE directly from a regression model
-
+# model: regression model from lm()
 my_sse_model <- function(model) {
   sum(residuals(model)^2)
 }
 
 
-# ============================================================
 # 21. RESIDUAL VARIANCE
-# ============================================================
 
-# Residual variance:
-#
-# SSE / N
-#
-# when following the course's MSE/variance convention
-
+# actual: observed values, predicted: fitted values
 my_residual_variance <- function(actual, predicted) {
   sum((actual - predicted)^2) / length(actual)
 }
 
 
-# ============================================================
-# 22. MULTIPLE REGRESSION R^2
-# ============================================================
+# 22. MULTIPLE REGRESSION R-SQUARED
 
+# model: regression model from lm()
 my_multiple_r_squared <- function(model) {
   summary(model)$r.squared
 }
 
 
-# ============================================================
 # 23. RESIDUALS
-# ============================================================
 
+# actual: observed values, predicted: fitted values
 my_residuals <- function(actual, predicted) {
   actual - predicted
 }
-
-
-# ============================================================
-# END OF CHAPTER 2
-# ============================================================
