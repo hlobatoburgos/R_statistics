@@ -229,12 +229,12 @@ my_kurtosis_from_values <- function(mu4, sigma) {
 # CHAPTER 2 - STATISTICAL MODELLING
 # ============================================================
 
-#FOR PASSING TABLES TO VALUES X Y WITH LARGE FREQUENCIES USE FOLLOWING:
+# FOR PASSING TABLES TO VALUES X Y WITH LARGE FREQUENCIES USE FOLLOWING:
 # For x: values 2, 5, 7, 10 repeated 7, 9, 7, 9 times respectively
-x <- rep(c(2, 5, 7, 10), times = c(7, 9, 7, 9))
+# x <- rep(c(2, 5, 7, 10), times = c(7, 9, 7, 9))
 
 # For y: values 0, 1, 2, 3, 4, 5 repeated 7, 12, 6, 3, 3, 2 times respectively
-y <- rep(c(0, 1, 2, 3, 4, 5), times = c(7, 12, 6, 3, 3, 2))
+# y <- rep(c(0, 1, 2, 3, 4, 5), times = c(7, 12, 6, 3, 3, 2))
 
 
 # BIVARIATE GRAPHICS & SCATTER PLOT FUNCTION
@@ -272,52 +272,42 @@ my_total_frequency <- function(F) sum(F)
 
 # 2. CONDITIONAL DISTRIBUTIONS
 
-1. Conditional distribution of Y given a single X index (assuming rows = Y, cols = X)
+# F: joint table, x_index: row corresponding to X value
 my_y_given_x <- function(F, x_index) {
   col_data <- F[, x_index]
   col_data / sum(col_data)
 }
 
-#  Conditional distribution of X given a single Y index
+# F: joint table, y_index: column corresponding to Y value
 my_x_given_y <- function(F, y_index) {
   row_data <- F[y_index, ]
   row_data / sum(row_data)
 }
 
-#  Conditional mean of Y given a single X index
+# y: Y values, F: joint table, x_index: X row
 my_mean_y_given_x <- function(y, F, x_index) {
   f <- F[, x_index]
   sum(y * f) / sum(f)
 }
 
-#  Conditional mean of X given a single Y index
+# x: X values, F: joint table, y_index: Y column
 my_mean_x_given_y <- function(x, F, y_index) {
   f <- F[y_index, ]
   sum(x * f) / sum(f)
 }
 
-#  Conditional distribution of Y given a RANGE/SET of X columns
-my_y_given_x_range <- function(F, x_indices) {                    # GET INDICES: x_subset_indices <- which(x_vals >= 1 & x_vals <= 3)
+# Conditional distribution of Y given a RANGE/SET of X columns
+my_y_given_x_range <- function(F, x_indices) {
   cond_freqs <- rowSums(F[, x_indices, drop = FALSE])
   cond_freqs / sum(cond_freqs)
 }
 
-#  Conditional distribution of X given a RANGE/SET of Y rows
+# Conditional distribution of X given a RANGE/SET of Y rows
 my_x_given_y_range <- function(F, y_indices) {
   cond_freqs <- colSums(F[y_indices, , drop = FALSE])
   cond_freqs / sum(cond_freqs)
 }
-#           |||||HOW TO APPLY|||||
-#  Apply range function to get probabilities
-cond_probs <- my_y_given_x_range(F_joint, x_subset_indices)
 
-#  Build the final formatted table
-final_table <- data.frame(
-  Y_Intervals = y_categories,
-  Conditional_Probability = as.character(frac_probs)
-)
-# Print the final table
-print(final_table)
 
 # 3. INDEPENDENCE
 
