@@ -237,6 +237,19 @@ x <- rep(c(2, 5, 7, 10), times = c(7, 9, 7, 9))
 y <- rep(c(0, 1, 2, 3, 4, 5), times = c(7, 12, 6, 3, 3, 2))
 
 
+# BIVARIATE GRAPHICS & SCATTER PLOT FUNCTION
+# x: independent variable, y: dependent variable, title: plot title
+my_scatter_plot <- function(x, y, x_lab = "X", y_lab = "Y", title = "Scatter Diagram") {
+  plot(x, y, 
+       main = title,
+       xlab = x_lab, 
+       ylab = y_lab, 
+       pch = 19,       # Solid circular points
+       col = "blue",   # Point color
+       cex = 1.2)      # Point size
+  grid()               # Adds a helpful background grid for reading values
+}
+
 # 1. BIVARIATE / JOINT DATA
 
 # x,y: paired observations
