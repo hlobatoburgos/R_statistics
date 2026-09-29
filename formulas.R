@@ -229,6 +229,14 @@ my_kurtosis_from_values <- function(mu4, sigma) {
 # CHAPTER 2 - STATISTICAL MODELLING
 # ============================================================
 
+#FOR PASSING TABLES TO VALUES X Y WITH LARGE FREQUENCIES USE FOLLOWING:
+# For x: values 2, 5, 7, 10 repeated 7, 9, 7, 9 times respectively
+x <- rep(c(2, 5, 7, 10), times = c(7, 9, 7, 9))
+
+# For y: values 0, 1, 2, 3, 4, 5 repeated 7, 12, 6, 3, 3, 2 times respectively
+y <- rep(c(0, 1, 2, 3, 4, 5), times = c(7, 12, 6, 3, 3, 2))
+
+
 # 1. BIVARIATE / JOINT DATA
 
 # x,y: paired observations
