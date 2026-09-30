@@ -356,7 +356,7 @@ my_covariance_from_moments <- function(m11, mx, my) {
 }
 
 
-# 5. CORRELATION
+# 5. CORRELATION ( r )
 
 # x,y: paired observations
 my_correlation <- function(x, y) {
