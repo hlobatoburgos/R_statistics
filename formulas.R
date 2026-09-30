@@ -367,7 +367,9 @@ my_correlation <- function(x, y) {
 my_correlation_from_values <- function(cov_xy, sigma_x, sigma_y) {
   cov_xy / (sigma_x * sigma_y)
 }
-
+# to check for evidence of association between 2 things run:
+#  assoc_test <- cor.test(x, y)
+#  print(assoc_test)
 
 # 6. SIMPLE LINEAR REGRESSION
 
