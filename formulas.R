@@ -273,8 +273,10 @@ my_median_discrete <- function(x_vals, marg) {
     p <- marg / sum(marg)
     x_vals[which(cumsum(p) >= 0.5)[1]]
   }
-
 # 2. CONDITIONAL DISTRIBUTIONS
+
+#  y_idx <- which(y_vals == 1) cond <- P[, y_idx] cond used as marg for my_median_discrete
+  
 
 # x/y_vals rows and cols of the freq table
 # dist <- my_x/y_given_y/x(F, )   F <- freq matrix 
