@@ -286,7 +286,7 @@ my_x_given_y <- function(F, y_index) {
 
 # y: Y values, F: joint table, x_index: X row
 my_mean_y_given_x <- function(y, F, x_index) {
-  f <- F[, x_index]
+  f <- F[x_index, ]
   sum(y * f) / sum(f)
 }
 
