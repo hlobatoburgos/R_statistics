@@ -276,7 +276,11 @@ my_median_discrete <- function(x_vals, marg) {
 # 2. CONDITIONAL DISTRIBUTIONS
 
 #  y_idx <- which(y_vals == 1) cond <- P[, y_idx] cond used as marg for my_median_discrete
-  
+# MODE IN BIVARIATE
+# For unconditional marginal of X
+#  mode_x <- x_vals[which.max(marg_x)]
+# For conditional distribution (e.g., X given Y = 1)
+#  mode_x_y1 <- x_vals[which.max(cond_x_y1)]  
 
 # x/y_vals rows and cols of the freq table
 # dist <- my_x/y_given_y/x(F, )   F <- freq matrix 
