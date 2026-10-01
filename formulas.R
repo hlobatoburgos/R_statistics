@@ -268,11 +268,16 @@ my_marginal_y <- function(F) colSums(F)
 
 # F: joint frequency table
 my_total_frequency <- function(F) sum(F)
-
+# Use for bivariate tables maybe
+my_median_discrete <- function(x_vals, marg) {
+    p <- marg / sum(marg)
+    x_vals[which(cumsum(p) >= 0.5)[1]]
+  }
 
 # 2. CONDITIONAL DISTRIBUTIONS
 
-# dist <- my_x/y_given_y/x(F, ) F <- freq matrix 
+# x/y_vals rows and cols of the freq table
+# dist <- my_x/y_given_y/x(F, )   F <- freq matrix 
 # res <- data.frame(X/Y = x/y_vals, Y/X_given_X/Y = dist)
 
 # 1. Conditional distribution of Y given X (Extracts a ROW)
