@@ -272,16 +272,16 @@ my_total_frequency <- function(F) sum(F)
 
 # 2. CONDITIONAL DISTRIBUTIONS
 
-# F: joint table, x_index: row corresponding to X value
+# 1. Conditional distribution of Y given X (Extracts a ROW)
 my_y_given_x <- function(F, x_index) {
-  col_data <- F[, x_index]
-  col_data / sum(col_data)
+  row_data <- F[x_index, ]
+  row_data / sum(row_data)
 }
 
-# F: joint table, y_index: column corresponding to Y value
+# 2. Conditional distribution of X given Y (Extracts a COLUMN)
 my_x_given_y <- function(F, y_index) {
-  row_data <- F[y_index, ]
-  row_data / sum(row_data)
+  col_data <- F[, y_index]
+  col_data / sum(col_data)
 }
 
 # y: Y values, F: joint table, x_index: X row
