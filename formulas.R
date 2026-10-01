@@ -272,6 +272,9 @@ my_total_frequency <- function(F) sum(F)
 
 # 2. CONDITIONAL DISTRIBUTIONS
 
+# dist <- my_x/y_given_y/x(F, ) F <- freq matrix 
+# res <- data.frame(X/Y = x/y_vals, Y/X_given_X/Y = dist)
+
 # 1. Conditional distribution of Y given X (Extracts a ROW)
 my_y_given_x <- function(F, x_index) {
   row_data <- F[x_index, ]
