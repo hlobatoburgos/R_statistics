@@ -667,7 +667,7 @@ my_residual_variance <- function(actual, predicted) {
 
 # 22. MULTIPLE REGRESSION R-SQUARED
 
-# model: regression model from lm()
+# model: regression model from lm()  // COEFFICIENT OF DETERMINATION 
 my_multiple_r_squared <- function(model) {
   summary(model)$r.squared
 }
