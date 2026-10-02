@@ -671,6 +671,19 @@ my_residual_variance <- function(actual, predicted) {
 my_multiple_r_squared <- function(model) {
   summary(model)$r.squared
 }
+my_adjusted_r_squared <- function(actual, predicted, num_parameters) {
+  n <- length(actual)
+  p <- num_parameters
+  
+  # MSE (Mean Squared Error / Residual Variance with degrees of freedom n - p)
+  mse <- sum((actual - predicted)^2) / (n - p)
+  
+  # Total Variance of the actual data (with n - 1 degrees of freedom)
+  total_var <- sum((actual - mean(actual))^2) / (n - 1)
+  
+  # Adjusted R-squared formula
+  1 - (mse / total_var)
+}
 
 
 # 23. RESIDUALS
