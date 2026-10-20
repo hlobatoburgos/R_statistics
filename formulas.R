@@ -460,7 +460,7 @@ my_regression_intersection <- function(reg_y_x, reg_x_y) {
 
 # 7. REGRESSION PREDICTIONS
 
-# x: X value, a: intercept, b: Y/X slope
+# x: X value, a: intercept, b: Y/X slope reg_["intercept] reg_["slope"]
 my_predict_y <- function(x, a, b) a + b * x
 
 # y: Y value, a: intercept, b: X/Y slope
