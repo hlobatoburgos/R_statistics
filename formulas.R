@@ -728,3 +728,104 @@ my_adjusted_r_squared <- function(actual, predicted, num_parameters) {
 my_residuals <- function(actual, predicted) {
   actual - predicted
 }
+# ============================================================
+# CHAPTER 3 - TIME SERIES
+# ============================================================
+
+# 1. MOVING AVERAGES (TREND-CYCLE)
+# Calculates the Trend-Cycle (T·C) component using moving averages.
+# Handles both odd (centered) and even (requires 0.5 weights at extremes) orders.
+# x: time series data, k: order (e.g., 4 for quarterly, 12 for monthly)
+my_moving_average <- function(x, k) {
+  if (k %% 2 != 0) {
+    # Odd order: equal weights
+    weights <- rep(1/k, k)
+  } else {
+    # Even order: uncentered, so we multiply extremes by 0.5 and divide by k
+    weights <- c(0.5, rep(1, k - 1), 0.5) / k
+  }
+  as.numeric(stats::filter(x, weights))
+}
+
+
+# 2. MULTIPLICATIVE DECOMPOSITION: SEASONAL INDICES (E)
+# Extracts the seasonal component from a multiplicative model (X = T * E * C * A).
+# x: observed data, tc: trend-cycle data, period: number of seasons (e.g., 4)
+my_seasonal_indices <- function(x, tc, period) {
+  # 1. Eliminate Trend-Cycle to isolate Seasonal * Random (E * A)
+  est_ale <- x / tc
+  
+  # 2. Organize data into a matrix (rows = years, cols = seasons)
+  mat <- matrix(est_ale, ncol = period, byrow = TRUE)
+  
+  # 3. Uncorrected indices: calculate the mean of each season to eliminate randomness
+  uncorrected <- colMeans(mat, na.rm = TRUE)
+  
+  # 4. Corrected indices: normalize so they sum to the number of periods (or 100*period in %)
+  correction_factor <- period / sum(uncorrected)
+  corrected <- uncorrected * correction_factor
+  
+  list(
+    uncorrected = uncorrected,
+    corrected = corrected
+  )
+}
+
+
+# 3. DESEASONALISATION
+# Removes the seasonal variations to study the true evolution of the series.
+# x: observed data, corrected_indices: the adjusted seasonal indices vector
+my_deseasonalize <- function(x, corrected_indices) {
+  # Repeat the seasonal indices to match the length of the full time series
+  full_indices <- rep(corrected_indices, length.out = length(x))
+  x / full_indices # X / E
+}
+
+
+# 4. RANDOM COMPONENT (A)
+# Isolates the random/accidental factors affecting the model.
+# x: observed data, tc: trend-cycle, corrected_indices: adjusted seasonal indices
+my_random_component <- function(x, tc, corrected_indices) {
+  full_indices <- rep(corrected_indices, length.out = length(x))
+  (x / tc) / full_indices
+}
+
+
+# 5. TRUE TREND REGRESSION
+# Calculates the corrected trend line equation (X = a + b*t) from the deseasonalized data.
+# deseasonalized: the X/E series
+my_true_trend_regression <- function(deseasonalized) {
+  t <- seq_along(deseasonalized) # Assigns t = 1, 2, ..., n
+  model <- lm(deseasonalized ~ t)
+  coefficients(model) # Returns intercept (a) and slope (b)
+}
+
+
+# 6. AUTOCORRELATION (CYCLE DETECTION)
+# Calculates linear correlation between the series and itself shifted by 'lag' periods.
+# A correlation close to 1 indicates a cycle.
+# x: time series data, lag: number of periods to shift (e.g., 3)
+my_autocorrelation <- function(x, lag) {
+  n <- length(x)
+  if (n <= lag) return(NA)
+  x1 <- head(x, -lag) # Remove last 'lag' elements
+  x2 <- tail(x, -lag) # Remove first 'lag' elements
+  
+  # Based on the specific R syntax requested in the chapter
+  sqrt(summary(lm(x1 ~ x2))$r.squared)
+}
+
+
+# 7. INDEX NUMBERS & DEFLATION
+
+# Calculates simple index (percentage of variation from a base period).
+# x_t: current value, x_0: base reference value
+my_simple_index <- function(x_t, x_0) {
+  x_t / x_0
+}
+
+# Converts nominal (current) values into real (constant) values.
+# nominal: apparent value at time t, cpi_decimal: cost of living index (as a per-unit decimal, not %)
+my_deflation <- function(nominal, cpi_decimal) {
+  nominal / cpi_decimal
+}
