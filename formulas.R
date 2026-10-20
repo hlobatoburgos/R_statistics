@@ -552,8 +552,8 @@ my_spearman <- function(x, y) {
 
 # x,y: observations; model y = a + b*ln(x)
 my_log_regression <- function(x, y) {
-  model <- lm(y ~ log(x))
-  coefficients(model)
+  df <- data.frame(x = x, y = y)
+  lm(y ~ log(x), data = df)
 }
 
 # x: new X value, model: logarithmic regression model
