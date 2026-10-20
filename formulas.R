@@ -429,6 +429,16 @@ my_covariance_from_slope <- function(b_yx, var_x) {
 my_variance_y_from_slope <- function(cov_xy, b_xy) {
   cov_xy / b_xy
 }
+# Draws both regression lines on an existing scatter plot
+my_draw_regression_lines <- function(reg_y_x, reg_x_y, col1 = "blue", col2 = "red") {
+  # 1. Line Y on X: y = a + b*x
+  abline(a = reg_y_x["intercept"], b = reg_y_x["slope"], col = col1, lwd = 2)
+  
+  # 2. Line X on Y: x = a' + b'*y  =>  y = (-a'/b') + (1/b')*x
+  a_inv <- reg_x_y["intercept"]
+  b_inv <- reg_x_y["slope"]
+  abline(a = -a_inv / b_inv, b = 1 / b_inv, col = col2, lwd = 2)
+}
 
 # 7. REGRESSION PREDICTIONS
 
