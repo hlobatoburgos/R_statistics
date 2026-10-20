@@ -439,6 +439,24 @@ my_draw_regression_lines <- function(reg_y_x, reg_x_y, col1 = "blue", col2 = "re
   b_inv <- reg_x_y["slope"]
   abline(a = -a_inv / b_inv, b = 1 / b_inv, col = col2, lwd = 2)
 }
+# Calculates the intersection point (x, y) of the two regression lines
+my_regression_intersection <- function(reg_y_x, reg_x_y) {
+  a1 <- reg_y_x["intercept"]
+  b1 <- reg_y_x["slope"]
+  a2 <- reg_x_y["intercept"]
+  b2 <- reg_x_y["slope"]
+  
+  # System of equations:
+  # -b1 * x + 1 * y = a1
+  #   1 * x - b2 * y = a2
+  A <- matrix(c(-b1, 1, 
+                 1, -b2), nrow = 2, byrow = TRUE)
+  B <- c(a1, a2)
+  
+  point <- solve(A, B)
+  names(point) <- c("x", "y")
+  point
+}
 
 # 7. REGRESSION PREDICTIONS
 
