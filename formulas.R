@@ -420,7 +420,15 @@ my_intercept_y_on_x <- function(mean_x, mean_y, slope) {
 my_intercept_x_on_y <- function(mean_x, mean_y, slope) {
   mean_x - slope * mean_y
 }
+# b_yx: slope of Y on X, var_x: variance of X
+my_covariance_from_slope <- function(b_yx, var_x) {
+  b_yx * var_x
+}
 
+# cov_xy: covariance, b_xy: slope of X on Y
+my_variance_y_from_slope <- function(cov_xy, b_xy) {
+  cov_xy / b_xy
+}
 
 # 7. REGRESSION PREDICTIONS
 
