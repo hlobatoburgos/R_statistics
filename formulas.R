@@ -188,9 +188,34 @@ my_mode <- function(x) {
   if (length(m) == length(f)) return(NULL)
   m
 }
+# 9. OUTLIERS
 
+# Method 1: IQR 
+# Identifies values below Q1 - 1.5*IQR or above Q3 + 1.5*IQR
+# x: data vector, k: multiplier (default is 1.5 for mild outliers, 3.0 for extreme)
+my_outliers_iqr <- function(x, k = 1.5) {
+  q1 <- my_quantile(x, 0.25)
+  q3 <- my_quantile(x, 0.75)
+  iqr_val <- q3 - q1
+  
+  lower_bound <- q1 - k * iqr_val
+  upper_bound <- q3 + k * iqr_val
+  
+  x[x < lower_bound | x > upper_bound]
+}
 
-# 9. SKEWNESS
+# Method 2: Z-Score Method
+# Identifies values that deviate from the mean by more than threshold standard deviations
+# x: data vector, threshold: z-score cutoff (default is 3)
+my_outliers_zscore <- function(x, threshold = 3) {
+  mu <- mean(x)
+  sigma <- my_sd(x)
+  z_scores <- abs(my_z(x, mu, sigma))
+  
+  x[z_scores > threshold]
+}
+
+# 10. SKEWNESS
 
 # mu: mean, mode: mode, sigma: SD
 my_pearson_skew <- function(mu, mode, sigma) {
@@ -210,7 +235,7 @@ my_fisher_skew_from_values <- function(mu3, sigma) {
 }
 
 
-# 10. KURTOSIS
+# 11. KURTOSIS
 
 # x: data vector
 my_kurtosis <- function(x) {
