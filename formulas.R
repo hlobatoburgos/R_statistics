@@ -188,6 +188,8 @@ my_mode <- function(x) {
   if (length(m) == length(f)) return(NULL)
   m
 }
+
+
 # 9. OUTLIERS
 
 # IQR / Boxplot Method
@@ -292,23 +294,15 @@ my_marginal_y <- function(F) colSums(F)
 
 # F: joint frequency table
 my_total_frequency <- function(F) sum(F)
+
 # Use for bivariate tables maybe
 my_median_discrete <- function(x_vals, marg) {
-    p <- marg / sum(marg)
-    x_vals[which(cumsum(p) >= 0.5)[1]]
-  }
+  p <- marg / sum(marg)
+  x_vals[which(cumsum(p) >= 0.5)[1]]
+}
+
+
 # 2. CONDITIONAL DISTRIBUTIONS
-
-#  y_idx <- which(y_vals == 1) cond <- P[, y_idx] cond used as marg for my_median_discrete
-# MODE IN BIVARIATE
-# For unconditional marginal of X
-#  mode_x <- x_vals[which.max(marg_x)]
-# For conditional distribution (e.g., X given Y = 1)
-#  mode_x_y1 <- x_vals[which.max(cond_x_y1)]  
-
-# x/y_vals rows and cols of the freq table
-# dist <- my_x/y_given_y/x(F, )   F <- freq matrix 
-# res <- data.frame(X/Y = x/y_vals, Y/X_given_X/Y = dist)
 
 # 1. Conditional distribution of Y given X (Extracts a ROW)
 my_y_given_x <- function(F, x_index) {
@@ -405,9 +399,7 @@ my_correlation <- function(x, y) {
 my_correlation_from_values <- function(cov_xy, sigma_x, sigma_y) {
   cov_xy / (sigma_x * sigma_y)
 }
-# to check for evidence of association between 2 things run:
-#  assoc_test <- cor.test(x, y)
-#  print(assoc_test)
+
 
 # 6. SIMPLE LINEAR REGRESSION
 
@@ -444,6 +436,7 @@ my_intercept_y_on_x <- function(mean_x, mean_y, slope) {
 my_intercept_x_on_y <- function(mean_x, mean_y, slope) {
   mean_x - slope * mean_y
 }
+
 # b_yx: slope of Y on X, var_x: variance of X
 my_covariance_from_slope <- function(b_yx, var_x) {
   b_yx * var_x
@@ -453,16 +446,16 @@ my_covariance_from_slope <- function(b_yx, var_x) {
 my_variance_y_from_slope <- function(cov_xy, b_xy) {
   cov_xy / b_xy
 }
+
 # Draws both regression lines on an existing scatter plot
 my_draw_regression_lines <- function(reg_y_x, reg_x_y, col1 = "blue", col2 = "red") {
-  # 1. Line Y on X: y = a + b*x
   abline(a = reg_y_x["intercept"], b = reg_y_x["slope"], col = col1, lwd = 2)
   
-  # 2. Line X on Y: x = a' + b'*y  =>  y = (-a'/b') + (1/b')*x
   a_inv <- reg_x_y["intercept"]
   b_inv <- reg_x_y["slope"]
   abline(a = -a_inv / b_inv, b = 1 / b_inv, col = col2, lwd = 2)
 }
+
 # Calculates the intersection point (x, y) of the two regression lines
 my_regression_intersection <- function(reg_y_x, reg_x_y) {
   a1 <- reg_y_x["intercept"]
@@ -470,9 +463,6 @@ my_regression_intersection <- function(reg_y_x, reg_x_y) {
   a2 <- reg_x_y["intercept"]
   b2 <- reg_x_y["slope"]
   
-  # System of equations:
-  # -b1 * x + 1 * y = a1
-  #   1 * x - b2 * y = a2
   A <- matrix(c(-b1, 1, 
                  1, -b2), nrow = 2, byrow = TRUE)
   B <- c(a1, a2)
@@ -482,9 +472,10 @@ my_regression_intersection <- function(reg_y_x, reg_x_y) {
   point
 }
 
+
 # 7. REGRESSION PREDICTIONS
 
-# x: X value, a: intercept, b: Y/X slope reg_["intercept] reg_["slope"]
+# x: X value, a: intercept, b: Y/X slope
 my_predict_y <- function(x, a, b) a + b * x
 
 # y: Y value, a: intercept, b: X/Y slope
@@ -584,10 +575,11 @@ my_log_regression <- function(x, y) {
 my_predict_log <- function(x, model) {
   predict(model, newdata = data.frame(x = x))
 }
+
+
 # 16. EXPONENTIAL & PARABOLIC REGRESSION
 
-
-#   EXPONENTIAL REGRESSION: y = a * e^(b * x)  ==>  ln(y) = ln(a) + b * x
+# EXPONENTIAL REGRESSION: y = a * e^(b * x) ==> ln(y) = ln(a) + b * x
 my_exp_regression <- function(x, y) {
   df <- data.frame(x = x, y = y)
   lm(log(y) ~ x, data = df)
@@ -599,8 +591,7 @@ my_predict_exp <- function(x_val, model) {
   unname(exp(pred_log))
 }
 
-
-#   PARABOLIC / QUADRATIC REGRESSION: y = a + b*x + c*x^2
+# PARABOLIC / QUADRATIC REGRESSION: y = a + b*x + c*x^2
 my_parabolic_regression <- function(x, y) {
   df <- data.frame(x = x, y = y)
   lm(y ~ x + I(x^2), data = df)
@@ -610,6 +601,7 @@ my_parabolic_regression <- function(x, y) {
 my_predict_parabolic <- function(x_val, model) {
   unname(predict(model, newdata = data.frame(x = x_val)))
 }
+
 
 # 17. CONTINGENCY TABLE / CHI-SQUARE
 
@@ -750,47 +742,100 @@ my_residual_variance <- function(actual, predicted) {
 }
 
 
-# 23. MULTIPLE REGRESSION R-SQUARED
-
-# model: regression model from lm()  // COEFFICIENT OF DETERMINATION 
-my_multiple_r_squared <- function(model) {
-  summary(model)$r.squared
-}
-my_adjusted_r_squared <- function(actual, predicted, num_parameters) {
-  n <- length(actual)
-  p <- num_parameters
-  
-  # MSE (Mean Squared Error / Residual Variance with degrees of freedom n - p)
-  mse <- sum((actual - predicted)^2) / (n - p)
-  
-  # Total Variance of the actual data (with n - 1 degrees of freedom)
-  total_var <- sum((actual - mean(actual))^2) / (n - 1)
-  
-  # Adjusted R-squared formula
-  1 - (mse / total_var)
-}
-
-
-# 24. RESIDUALS
+# 23. RESIDUALS
 
 # actual: observed values, predicted: fitted values
 my_residuals <- function(actual, predicted) {
   actual - predicted
 }
+
+
+# 24. UNIFIED GOODNESS OF FIT
+
+# Core Adjusted R-squared formula
+# actual: observed Y vector, predicted: fitted Y vector, p: number of parameters
+my_adjusted_r2 <- function(actual, predicted, p) {
+  n <- length(actual)
+  sse <- sum((actual - predicted)^2)
+  sst <- sum((actual - mean(actual))^2)
+  
+  # Degrees of freedom correction
+  1 - ((sse / (n - p)) / (sst / (n - 1)))
+}
+
+# Backward compatibility alias
+my_adjusted_r_squared <- function(actual, predicted, num_parameters) {
+  my_adjusted_r2(actual, predicted, p = num_parameters)
+}
+
+# Root Mean Squared Error (RMSE) in original Y units
+my_rmse <- function(actual, predicted) {
+  sqrt(sum((actual - predicted)^2) / length(actual))
+}
+
+# SPECIFIC MODEL EVALUATORS (ADJUSTED R-SQUARED)
+
+# 1. Simple Linear Regression (p = 2)
+my_adj_r2_linear <- function(x, y, reg_y_x) {
+  pred <- my_predict_y(x, reg_y_x["intercept"], reg_y_x["slope"])
+  my_adjusted_r2(y, pred, p = 2)
+}
+
+# 2. Logarithmic Regression (p = 2)
+my_adj_r2_log <- function(x, y, model) {
+  pred <- my_predict_log(x, model)
+  my_adjusted_r2(y, pred, p = 2)
+}
+
+# 3. Exponential Regression (p = 2)
+# Evaluates fit in the original scale of Y (not log scale)
+my_adj_r2_exp <- function(x, y, model) {
+  pred <- my_predict_exp(x, model)
+  my_adjusted_r2(y, pred, p = 2)
+}
+
+# 4. Parabolic Regression (p = 3)
+my_adj_r2_parabolic <- function(x, y, model) {
+  pred <- my_predict_parabolic(x, model)
+  my_adjusted_r2(y, pred, p = 3)
+}
+
+# MASTER GOODNESS OF FIT FUNCTION
+
+# Evaluates model performance using Adjusted R2, RMSE, and SSE
+# model_type options: "linear_yx", "log", "exp", "parabolic", "multiple"
+my_goodness_of_fit <- function(x, y, model, model_type = "linear_yx") {
+  
+  # Map model type to predictions and parameter counts (p)
+  info <- switch(model_type,
+    "linear_yx" = list(pred = my_predict_y(x, model["intercept"], model["slope"]), p = 2),
+    "log"       = list(pred = my_predict_log(x, model), p = 2),
+    "exp"       = list(pred = my_predict_exp(x, model), p = 2),
+    "parabolic" = list(pred = my_predict_parabolic(x, model), p = 3),
+    "multiple"  = list(pred = predict(model), p = length(coefficients(model))),
+    stop("Invalid model_type. Choose: 'linear_yx', 'log', 'exp', 'parabolic', or 'multiple'")
+  )
+  
+  pred <- info$pred
+  p    <- info$p
+  
+  adj_r2 <- my_adjusted_r2(y, pred, p = p)
+  rmse   <- my_rmse(y, pred)
+  sse    <- sum((y - pred)^2)
+  
+  c(Adj_R_squared = adj_r2, RMSE = rmse, SSE = sse)
+}
+
+
 # ============================================================
 # CHAPTER 3 - TIME SERIES
 # ============================================================
 
 # 1. MOVING AVERAGES (TREND-CYCLE)
-# Calculates the Trend-Cycle (T·C) component using moving averages.
-# Handles both odd (centered) and even (requires 0.5 weights at extremes) orders.
-# x: time series data, k: order (e.g., 4 for quarterly, 12 for monthly)
 my_moving_average <- function(x, k) {
   if (k %% 2 != 0) {
-    # Odd order: equal weights
     weights <- rep(1/k, k)
   } else {
-    # Even order: uncentered, so we multiply extremes by 0.5 and divide by k
     weights <- c(0.5, rep(1, k - 1), 0.5) / k
   }
   as.numeric(stats::filter(x, weights))
@@ -798,19 +843,10 @@ my_moving_average <- function(x, k) {
 
 
 # 2. MULTIPLICATIVE DECOMPOSITION: SEASONAL INDICES (E)
-# Extracts the seasonal component from a multiplicative model (X = T * E * C * A).
-# x: observed data, tc: trend-cycle data, period: number of seasons (e.g., 4)
 my_seasonal_indices <- function(x, tc, period) {
-  # 1. Eliminate Trend-Cycle to isolate Seasonal * Random (E * A)
   est_ale <- x / tc
-  
-  # 2. Organize data into a matrix (rows = years, cols = seasons)
   mat <- matrix(est_ale, ncol = period, byrow = TRUE)
-  
-  # 3. Uncorrected indices: calculate the mean of each season to eliminate randomness
   uncorrected <- colMeans(mat, na.rm = TRUE)
-  
-  # 4. Corrected indices: normalize so they sum to the number of periods (or 100*period in %)
   correction_factor <- period / sum(uncorrected)
   corrected <- uncorrected * correction_factor
   
@@ -822,18 +858,13 @@ my_seasonal_indices <- function(x, tc, period) {
 
 
 # 3. DESEASONALISATION
-# Removes the seasonal variations to study the true evolution of the series.
-# x: observed data, corrected_indices: the adjusted seasonal indices vector
 my_deseasonalize <- function(x, corrected_indices) {
-  # Repeat the seasonal indices to match the length of the full time series
   full_indices <- rep(corrected_indices, length.out = length(x))
-  x / full_indices # X / E
+  x / full_indices
 }
 
 
 # 4. RANDOM COMPONENT (A)
-# Isolates the random/accidental factors affecting the model.
-# x: observed data, tc: trend-cycle, corrected_indices: adjusted seasonal indices
 my_random_component <- function(x, tc, corrected_indices) {
   full_indices <- rep(corrected_indices, length.out = length(x))
   (x / tc) / full_indices
@@ -841,40 +872,30 @@ my_random_component <- function(x, tc, corrected_indices) {
 
 
 # 5. TRUE TREND REGRESSION
-# Calculates the corrected trend line equation (X = a + b*t) from the deseasonalized data.
-# deseasonalized: the X/E series
 my_true_trend_regression <- function(deseasonalized) {
-  t <- seq_along(deseasonalized) # Assigns t = 1, 2, ..., n
+  t <- seq_along(deseasonalized)
   model <- lm(deseasonalized ~ t)
-  coefficients(model) # Returns intercept (a) and slope (b)
+  coefficients(model)
 }
 
 
 # 6. AUTOCORRELATION (CYCLE DETECTION)
-# Calculates linear correlation between the series and itself shifted by 'lag' periods.
-# A correlation close to 1 indicates a cycle.
-# x: time series data, lag: number of periods to shift (e.g., 3)
 my_autocorrelation <- function(x, lag) {
   n <- length(x)
   if (n <= lag) return(NA)
-  x1 <- head(x, -lag) # Remove last 'lag' elements
-  x2 <- tail(x, -lag) # Remove first 'lag' elements
+  x1 <- head(x, -lag)
+  x2 <- tail(x, -lag)
   
-  # Based on the specific R syntax requested in the chapter
   sqrt(summary(lm(x1 ~ x2))$r.squared)
 }
 
 
 # 7. INDEX NUMBERS & DEFLATION
 
-# Calculates simple index (percentage of variation from a base period).
-# x_t: current value, x_0: base reference value
 my_simple_index <- function(x_t, x_0) {
   x_t / x_0
 }
 
-# Converts nominal (current) values into real (constant) values.
-# nominal: apparent value at time t, cpi_decimal: cost of living index (as a per-unit decimal, not %)
 my_deflation <- function(nominal, cpi_decimal) {
   nominal / cpi_decimal
 }
