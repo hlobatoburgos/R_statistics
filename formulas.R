@@ -560,9 +560,34 @@ my_log_regression <- function(x, y) {
 my_predict_log <- function(x, model) {
   predict(model, newdata = data.frame(x = x))
 }
+# 16. EXPONENTIAL & PARABOLIC REGRESSION
 
 
-# 16. CONTINGENCY TABLE / CHI-SQUARE
+#   EXPONENTIAL REGRESSION: y = a * e^(b * x)  ==>  ln(y) = ln(a) + b * x
+my_exp_regression <- function(x, y) {
+  df <- data.frame(x = x, y = y)
+  lm(log(y) ~ x, data = df)
+}
+
+# Prediction for Exponential Model: e^(ln(y))
+my_predict_exp <- function(x_val, model) {
+  pred_log <- predict(model, newdata = data.frame(x = x_val))
+  unname(exp(pred_log))
+}
+
+
+#   PARABOLIC / QUADRATIC REGRESSION: y = a + b*x + c*x^2
+my_parabolic_regression <- function(x, y) {
+  df <- data.frame(x = x, y = y)
+  lm(y ~ x + I(x^2), data = df)
+}
+
+# Prediction for Parabolic Model
+my_predict_parabolic <- function(x_val, model) {
+  unname(predict(model, newdata = data.frame(x = x_val)))
+}
+
+# 17. CONTINGENCY TABLE / CHI-SQUARE
 
 # F: observed frequency table
 my_chi_square <- function(F) {
@@ -584,7 +609,7 @@ my_contingency_analysis <- function(F) {
 }
 
 
-# 17. GROUPED BIVARIATE DATA
+# 18. GROUPED BIVARIATE DATA
 
 # lower, upper: class limits
 my_class_mark <- function(lower, upper) {
@@ -637,7 +662,7 @@ my_bivariate_covariance <- function(x, y, F) {
 }
 
 
-# 18. REGRESSION FROM GROUPED BIVARIATE DATA
+# 19. REGRESSION FROM GROUPED BIVARIATE DATA
 
 # x,y: class marks, F: joint frequency table
 my_bivariate_regression_y_on_x <- function(x, y, F) {
@@ -662,7 +687,7 @@ my_bivariate_regression_x_on_y <- function(x, y, F) {
 }
 
 
-# 19. MULTIPLE LINEAR REGRESSION
+# 20. MULTIPLE LINEAR REGRESSION
 
 # x,y: predictors, z: dependent variable
 my_multiple_regression <- function(x, y, z) {
@@ -680,7 +705,7 @@ my_multiple_predictions <- function(x, y, z) {
 }
 
 
-# 20. SSE
+# 21. SSE
 
 # actual: observed values, predicted: fitted values
 my_sse <- function(actual, predicted) {
@@ -693,7 +718,7 @@ my_sse_model <- function(model) {
 }
 
 
-# 21. RESIDUAL VARIANCE
+# 22. RESIDUAL VARIANCE
 
 # actual: observed values, predicted: fitted values
 my_residual_variance <- function(actual, predicted) {
@@ -701,7 +726,7 @@ my_residual_variance <- function(actual, predicted) {
 }
 
 
-# 22. MULTIPLE REGRESSION R-SQUARED
+# 23. MULTIPLE REGRESSION R-SQUARED
 
 # model: regression model from lm()  // COEFFICIENT OF DETERMINATION 
 my_multiple_r_squared <- function(model) {
@@ -722,7 +747,7 @@ my_adjusted_r_squared <- function(actual, predicted, num_parameters) {
 }
 
 
-# 23. RESIDUALS
+# 24. RESIDUALS
 
 # actual: observed values, predicted: fitted values
 my_residuals <- function(actual, predicted) {
