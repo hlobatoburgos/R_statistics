@@ -190,9 +190,8 @@ my_mode <- function(x) {
 }
 # 9. OUTLIERS
 
-# Method 1: IQR 
-# Identifies values below Q1 - 1.5*IQR or above Q3 + 1.5*IQR
-# x: data vector, k: multiplier (default is 1.5 for mild outliers, 3.0 for extreme)
+# IQR / Boxplot Method
+# General outliers: k = 1.5 | Extreme outliers: k = 3.0
 my_outliers_iqr <- function(x, k = 1.5) {
   q1 <- my_quantile(x, 0.25)
   q3 <- my_quantile(x, 0.75)
@@ -204,16 +203,16 @@ my_outliers_iqr <- function(x, k = 1.5) {
   x[x < lower_bound | x > upper_bound]
 }
 
-# Method 2: Z-Score Method
-# Identifies values that deviate from the mean by more than threshold standard deviations
-# x: data vector, threshold: z-score cutoff (default is 3)
-my_outliers_zscore <- function(x, threshold = 3) {
+# Z-Score Method
+# General outliers: threshold = 2 | Extreme outliers: threshold = 3
+my_outliers_zscore <- function(x, threshold = 2) {
   mu <- mean(x)
   sigma <- my_sd(x)
   z_scores <- abs(my_z(x, mu, sigma))
   
   x[z_scores > threshold]
 }
+
 
 # 10. SKEWNESS
 
