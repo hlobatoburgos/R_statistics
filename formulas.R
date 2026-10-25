@@ -611,7 +611,7 @@ my_chi_square <- function(F) {
   sum((F - E)^2 / E)
 }
 
-# chi_square: chi-square statistic, N: total observations
+# chi_square: chi-square statistic, N: total observations (sum(freq))
 my_contingency_coefficient <- function(chi_square, N) {
   sqrt(chi_square / (chi_square + N))
 }
