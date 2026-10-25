@@ -603,7 +603,7 @@ my_predict_parabolic <- function(x_val, model) {
 }
 
 
-# 17. CONTINGENCY TABLE / CHI-SQUARE
+# 17. CONTINGENCY TABLE / CHI-SQUARE ---X²---
 
 # F: observed frequency table
 my_chi_square <- function(F) {
