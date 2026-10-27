@@ -882,7 +882,7 @@ my_goodness_of_fit <- function(x, y, model, model_type = "linear_yx") {
 # CHAPTER 3 - TIME SERIES
 # ============================================================
 
-# 1. MOVING AVERAGES (TREND-CYCLE)
+# 1. MOVING AVERAGES (TREND-CYCLE) use na.omit() to rid of NA values and [x : y] outside to select terms
 my_moving_average <- function(x, k) {
   if (k %% 2 != 0) {
     weights <- rep(1/k, k)
