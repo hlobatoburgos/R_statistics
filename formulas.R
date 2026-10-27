@@ -504,7 +504,7 @@ my_r_from_regression_slopes <- function(b, b_prime) {
   sign(b) * sqrt(r2)
 }
 
-# b,b_prime: two regression slopes
+# b,b_prime: two regression slopes (Y on X then X on Y)
 my_valid_regression_slopes <- function(b, b_prime) {
   b * b_prime >= 0 && b * b_prime <= 1
 }
