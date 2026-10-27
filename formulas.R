@@ -936,7 +936,7 @@ my_true_trend_regression <- function(deseasonalized) {
 }
 
 
-# 6. AUTOCORRELATION (CYCLE DETECTION) "Determine if the time series has a cycle of period ###"
+# 6. AUTOCORRELATION (CYCLE DETECTION) "Determine if the time series has a cycle of period (lag)"
 my_autocorrelation <- function(x, lag) {
   n <- length(x)
   if (n <= lag) return(NA)
