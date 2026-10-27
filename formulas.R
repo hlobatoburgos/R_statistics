@@ -894,9 +894,16 @@ my_moving_average <- function(x, k) {
 
 
 # 2. MULTIPLICATIVE DECOMPOSITION: SEASONAL INDICES (E)
-my_seasonal_indices <- function(x, tc, period) {
-  est_ale <- x / tc
-  mat <- matrix(est_ale, ncol = period, byrow = TRUE)
+my_seasonal_indices <- function(x = NULL, tc = NULL, period = 4, ea_matrix = NULL) {
+  # If given an E * A matrix directly
+  if (!is.null(ea_matrix)) {
+    mat <- ea_matrix
+  } else {
+    # If given raw x and tc vectors
+    est_ale <- x / tc
+    mat <- matrix(est_ale, ncol = period, byrow = TRUE)
+  }
+  
   uncorrected <- colMeans(mat, na.rm = TRUE)
   correction_factor <- period / sum(uncorrected)
   corrected <- uncorrected * correction_factor
@@ -906,7 +913,6 @@ my_seasonal_indices <- function(x, tc, period) {
     corrected = corrected
   )
 }
-
 
 # 3. DESEASONALISATION
 my_deseasonalize <- function(x, corrected_indices) {
