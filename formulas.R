@@ -508,7 +508,20 @@ my_r_from_regression_slopes <- function(b, b_prime) {
 my_valid_regression_slopes <- function(b, b_prime) {
   b * b_prime >= 0 && b * b_prime <= 1
 }
+# cov_xy: covariance, b_yx: slope of Y on X
+my_variance_x_from_slope <- function(cov_xy, b_yx) {
+  cov_xy / b_yx
+}
 
+# var_x: Var(X), b_yx: slope Y/X, b_xy: slope X/Y
+my_variance_y_from_variances <- function(var_x, b_yx, b_xy) {
+  var_x * (b_yx / b_xy)
+}
+
+# var_y: Var(Y), b_yx: slope Y/X, b_xy: slope X/Y
+my_variance_x_from_variances <- function(var_y, b_yx, b_xy) {
+  var_y * (b_xy / b_yx)
+}
 
 # 10. CENTRE OF GRAVITY
 
