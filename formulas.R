@@ -928,7 +928,7 @@ my_random_component <- function(x, tc, corrected_indices) {
 }
 
 
-# 5. TRUE TREND REGRESSION
+# 5. TRUE TREND REGRESSION deseasonalized->vector of values
 my_true_trend_regression <- function(deseasonalized) {
   t <- seq_along(deseasonalized)
   model <- lm(deseasonalized ~ t)
