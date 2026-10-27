@@ -893,7 +893,7 @@ my_moving_average <- function(x, k) {
 }
 
 
-# 2. MULTIPLICATIVE DECOMPOSITION: SEASONAL INDICES (E)
+# 2. MULTIPLICATIVE DECOMPOSITION: SEASONAL INDICES (E) to print use print(res$corrected) or print(res$uncorrected)
 my_seasonal_indices <- function(x = NULL, tc = NULL, period = 4, ea_matrix = NULL) {
   # If given an E * A matrix directly
   if (!is.null(ea_matrix)) {
