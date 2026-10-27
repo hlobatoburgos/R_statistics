@@ -472,6 +472,44 @@ my_regression_intersection <- function(reg_y_x, reg_x_y) {
   point
 }
 
+# Removes an observation (x0, y0) from summary sums and recalculates regression lines
+my_remove_point_regression <- function(N, mean_x, mean_y, var_x, var_y, cov_xy, x0, y0) {
+  # 1. Reconstruct original sums
+  sum_x  <- N * mean_x
+  sum_y  <- N * mean_y
+  sum_x2 <- N * (var_x + mean_x^2)
+  sum_y2 <- N * (var_y + mean_y^2)
+  sum_xy <- N * (cov_xy + mean_x * mean_y)
+  
+  # 2. Subtract the outlier point
+  N_new      <- N - 1
+  sum_x_new  <- sum_x - x0
+  sum_y_new  <- sum_y - y0
+  sum_x2_new <- sum_x2 - x0^2
+  sum_y2_new <- sum_y2 - y0^2
+  sum_xy_new <- sum_xy - x0*y0
+  
+  # 3. Calculate new means
+  mx_new <- sum_x_new / N_new
+  my_new <- sum_y_new / N_new
+  
+  # 4. Calculate new variances & covariance
+  var_x_new  <- (sum_x2_new / N_new) - mx_new^2
+  var_y_new  <- (sum_y2_new / N_new) - my_new^2
+  cov_xy_new <- (sum_xy_new / N_new) - (mx_new * my_new)
+  
+  # 5. Calculate new regression slopes and intercepts
+  b_yx_new <- my_slope_y_on_x(cov_xy_new, var_x_new)
+  a_yx_new <- my_intercept_y_on_x(mx_new, my_new, b_yx_new)
+  
+  b_xy_new <- my_slope_x_on_y(cov_xy_new, var_y_new)
+  a_xy_new <- my_intercept_x_on_y(mx_new, my_new, b_xy_new)
+  
+  list(
+    Y_on_X = c(intercept = a_yx_new, slope = b_yx_new),
+    X_on_Y = c(intercept = a_xy_new, slope = b_xy_new)
+  )
+}
 
 # 7. REGRESSION PREDICTIONS
 
