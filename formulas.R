@@ -1008,3 +1008,25 @@ my_continuous_iqr <- function(f, lower, upper) {
   q3 <- my_continuous_quantile(f, lower, upper, 0.75)
   list(Q1 = q1, Q3 = q3, IQR = q3 - q1)
 }
+# 7. Probability in interval P(a <= X <= b)
+my_continuous_prob_interval <- function(f, lower, upper, a, b) {
+  cdf <- create_continuous_cdf(f, lower, upper)
+  cdf(b) - cdf(a)
+}
+
+# 8. Tail probability P(X <= x) or P(X >= x)
+my_continuous_prob_tail <- function(f, lower, upper, val, lower_tail = TRUE) {
+  cdf <- create_continuous_cdf(f, lower, upper)
+  if (lower_tail) {
+    cdf(val)
+  } else {
+    1 - cdf(val)
+  }
+}
+
+# 9. Conditional probability P(X <= a | X <= b)
+my_continuous_cond_prob <- function(f, lower, upper, a, b) {
+  cdf <- create_continuous_cdf(f, lower, upper)
+  # P(X <= min(a, b)) / P(X <= b)
+  cdf(min(a, b)) / cdf(b)
+}
