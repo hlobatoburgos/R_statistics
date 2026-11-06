@@ -957,17 +957,17 @@ my_deflation <- function(nominal, cpi_decimal) {
   nominal / cpi_decimal
 }
 # ==============================================================================
-# CHAPTER 5: CONTINUOUS RANDOM VARIABLES & PROBABILITY DISTRIBUTIONS
+# CHAPTER 5: CONTINUOUS RANDOM VARIABLES
 # ==============================================================================
 
-# 1. Density plot helper
+# 1. Density function plotter
 plot_pdf <- function(f, lower, upper, main = "Density Function f(x)") {
   curve(Vectorize(f)(x), from = lower - 0.5, to = upper + 0.5, 
         col = "blue", lwd = 2, ylab = "f(x)", xlab = "x", main = main)
   abline(h = 0, v = 0, lty = 2, col = "gray")
 }
 
-# 2. Continuous CDF Function Creator
+# 2. CDF builder
 create_continuous_cdf <- function(f, lower, upper) {
   function(x) {
     sapply(x, function(val) {
@@ -978,13 +978,13 @@ create_continuous_cdf <- function(f, lower, upper) {
   }
 }
 
-# 3. Continuous Expected Value E(X)
+# 3. Expected Value E(X)
 my_continuous_expected_value <- function(f, lower, upper) {
   g <- function(x) x * f(x)
   integrate(g, lower = lower, upper = upper)$value
 }
 
-# 4. Continuous Variance and Standard Deviation
+# 4. Variance and Standard Deviation
 my_continuous_variance <- function(f, lower, upper) {
   e_x <- my_continuous_expected_value(f, lower, upper)
   g_sq <- function(x) (x^2) * f(x)
@@ -995,14 +995,14 @@ my_continuous_variance <- function(f, lower, upper) {
   list(variance = var_x, sd = sd_x)
 }
 
-# 5. Continuous Quantile Function (For Median & Quartiles)
+# 5. Quantile Finder (Median & Quartiles)
 my_continuous_quantile <- function(f, lower, upper, p) {
   cdf <- create_continuous_cdf(f, lower, upper)
   obj <- function(x) cdf(x) - p
   uniroot(obj, interval = c(lower, upper))$root
 }
 
-# 6. Interquartile Range (R_C)
+# 6. Interquartile Range
 my_continuous_iqr <- function(f, lower, upper) {
   q1 <- my_continuous_quantile(f, lower, upper, 0.25)
   q3 <- my_continuous_quantile(f, lower, upper, 0.75)
