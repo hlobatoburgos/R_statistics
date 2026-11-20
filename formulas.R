@@ -1030,3 +1030,390 @@ my_continuous_cond_prob <- function(f, lower, upper, a, b) {
   # P(X <= min(a, b)) / P(X <= b)
   cdf(min(a, b)) / cdf(b)
 }
+# ==============================================================================
+# CHAPTER 6: STATISTICAL INFERENCE & HYPOTHESIS TESTING
+# ==============================================================================
+
+# 1. POINT ESTIMATION & SAMPLE STATISTICS (Grouped or Raw Data)
+
+# Point estimators from raw vector or frequency table (values & frequencies)
+my_point_estimators <- function(x, freq = NULL) {
+  if (!is.null(freq)) {
+    n <- sum(freq)
+    mean_val <- sum(x * freq) / n
+    # Sample variance (denominator n) and sample quasivariance S^2 (denominator n-1)
+    var_n <- sum(freq * (x - mean_val)^2) / n
+    quasi_var <- (n / (n - 1)) * var_n
+  } else {
+    n <- length(x)
+    mean_val <- mean(x)
+    quasi_var <- var(x) # R's var() uses n-1 by default
+    var_n <- quasi_var * ((n - 1) / n)
+  }
+  
+  list(
+    n = n,
+    sample_mean = mean_val,
+    sample_variance_n = var_n,
+    quasivariance_S2 = quasi_var,
+    quasi_sd_S = sqrt(quasi_var)
+  )
+}
+
+# Sample proportion estimator
+my_sample_proportion <- function(successes, n) {
+  p_hat <- successes / n
+  list(p_hat = p_hat, se = sqrt(p_hat * (1 - p_hat) / n))
+}
+
+# 2. SAMPLING DISTRIBUTIONS (Probabilities for Sample Mean & Quasivariance)
+
+# Probability for Sample Mean X_bar (Normal population / Large n)
+# Supports finite population correction if N is provided
+my_prob_sample_mean <- function(x_bar, mu, sigma_or_s, n, known_var = TRUE, 
+                                N = NULL, lower_tail = TRUE) {
+  se <- sigma_or_s / sqrt(n)
+  
+  # Finite population correction factor if sampling without replacement
+  if (!is.null(N)) {
+    se <- se * sqrt((N - n) / (N - 1))
+  }
+  
+  stat <- (x_bar - mu) / se
+  
+  if (known_var || n >= 30) {
+    pnorm(stat, lower.tail = lower_tail)
+  } else {
+    pt(stat, df = n - 1, lower.tail = lower_tail)
+  }
+}
+
+# Probability for Sample Quasivariance S^2: (n - 1)*S^2 / sigma^2 ~ Chi-sq(n-1)
+my_prob_sample_variance <- function(s2, sigma2, n, lower_tail = TRUE) {
+  chi_stat <- ((n - 1) * s2) / sigma2
+  pchisq(chi_stat, df = n - 1, lower.tail = lower_tail)
+}
+
+# 3. CONFIDENCE INTERVALS
+
+# 3A. CI for Population Mean (mu)
+my_ci_mean <- function(x_bar, s_or_sigma, n, conf_level = 0.95, known_var = FALSE) {
+  alpha <- 1 - conf_level
+  se <- s_or_sigma / sqrt(n)
+  
+  if (known_var || n > 30) {
+    crit <- qnorm(1 - alpha / 2)
+  } else {
+    crit <- qt(1 - alpha / 2, df = n - 1)
+  }
+  
+  margin <- crit * se
+  c(lower = x_bar - margin, upper = x_bar + margin)
+}
+
+# Required sample size n for a target margin of error E (Mean)
+my_sample_size_mean <- function(E, sigma, conf_level = 0.95) {
+  alpha <- 1 - conf_level
+  z <- qnorm(1 - alpha / 2)
+  ceiling((z * sigma / E)^2)
+}
+
+# 3B. CI for Population Variance (sigma^2)
+my_ci_variance <- function(s2, n, conf_level = 0.95) {
+  alpha <- 1 - conf_level
+  num <- (n - 1) * s2
+  lower <- num / qchisq(1 - alpha / 2, df = n - 1)
+  upper <- num / qchisq(alpha / 2, df = n - 1)
+  c(lower = lower, upper = upper)
+}
+
+# 3C. CI for Population Proportion (p)
+my_ci_proportion <- function(p_hat, n, conf_level = 0.95) {
+  alpha <- 1 - conf_level
+  z <- qnorm(1 - alpha / 2)
+  margin <- z * sqrt(p_hat * (1 - p_hat) / n)
+  c(lower = p_hat - margin, upper = p_hat + margin)
+}
+
+# 3D. CI for Difference of Two Means (mu1 - mu2)
+my_ci_diff_means <- function(x1_bar, x2_bar, s1, s2, n1, n2, conf_level = 0.95,
+                             known_var = FALSE, equal_var = TRUE) {
+  alpha <- 1 - conf_level
+  diff <- x1_bar - x2_bar
+  
+  if (known_var || (n1 + n2 > 30)) {
+    crit <- qnorm(1 - alpha / 2)
+    se <- sqrt((s1^2 / n1) + (s2^2 / n2))
+  } else if (equal_var) {
+    df <- n1 + n2 - 2
+    sp2 <- ((n1 - 1) * s1^2 + (n2 - 1) * s2^2) / df
+    crit <- qt(1 - alpha / 2, df = df)
+    se <- sqrt(sp2) * sqrt((1 / n1) + (1 / n2))
+  } else {
+    # Welch's approximation from slides
+    v1 <- s1^2 / n1
+    v2 <- s2^2 / n2
+    df <- ((v1 + v2)^2) / ((v1^2 / (n1 + 1)) + (v2^2 / (n2 + 1))) - 2
+    crit <- qt(1 - alpha / 2, df = df)
+    se <- sqrt(v1 + v2)
+  }
+  
+  margin <- crit * se
+  c(lower = diff - margin, upper = diff + margin)
+}
+
+# 3E. CI for Ratio of Two Variances (sigma1^2 / sigma2^2)
+my_ci_ratio_variances <- function(s1_sq, s2_sq, n1, n2, conf_level = 0.95) {
+  alpha <- 1 - conf_level
+  ratio <- s1_sq / s2_sq
+  lower <- ratio / qf(1 - alpha / 2, df1 = n1 - 1, df2 = n2 - 1)
+  upper <- ratio / qf(alpha / 2, df1 = n1 - 1, df2 = n2 - 1)
+  c(lower = lower, upper = upper)
+}
+
+# 3F. CI for Difference of Two Proportions (p1 - p2)
+my_ci_diff_proportions <- function(p1_hat, p2_hat, n1, n2, conf_level = 0.95) {
+  alpha <- 1 - conf_level
+  z <- qnorm(1 - alpha / 2)
+  diff <- p1_hat - p2_hat
+  se <- sqrt((p1_hat * (1 - p1_hat) / n1) + (p2_hat * (1 - p2_hat) / n2))
+  margin <- z * se
+  c(lower = diff - margin, upper = diff + margin)
+}
+
+# 4. PARAMETRIC HYPOTHESIS TESTS
+
+# Helper to format hypothesis decision
+.test_decision <- function(stat, crit_low, crit_high, p_val, alpha) {
+  reject <- (stat < crit_low) || (stat > crit_high)
+  list(
+    statistic = stat,
+    critical_region = c(lower = crit_low, upper = crit_high),
+    p_value = p_val,
+    decision = ifelse(reject, "Reject H0", "Accept H0 (Do not reject)")
+  )
+}
+
+# 4A. Test for Population Mean (mu)
+# alternative: "two.sided", "less", "greater"
+my_test_mean <- function(x_bar, mu0, s_or_sigma, n, alpha = 0.05,
+                         alternative = "two.sided", known_var = FALSE) {
+  se <- s_or_sigma / sqrt(n)
+  stat <- (x_bar - mu0) / se
+  use_z <- known_var || (n > 30)
+  
+  if (alternative == "two.sided") {
+    crit <- if (use_z) qnorm(1 - alpha / 2) else qt(1 - alpha / 2, df = n - 1)
+    p_val <- if (use_z) 2 * pnorm(-abs(stat)) else 2 * pt(-abs(stat), df = n - 1)
+    .test_decision(stat, -crit, crit, p_val, alpha)
+  } else if (alternative == "less") {
+    crit <- if (use_z) qnorm(alpha) else qt(alpha, df = n - 1)
+    p_val <- if (use_z) pnorm(stat) else pt(stat, df = n - 1)
+    .test_decision(stat, crit, Inf, p_val, alpha)
+  } else if (alternative == "greater") {
+    crit <- if (use_z) qnorm(1 - alpha) else qt(1 - alpha, df = n - 1)
+    p_val <- if (use_z) pnorm(stat, lower.tail = FALSE) else pt(stat, df = n - 1, lower.tail = FALSE)
+    .test_decision(stat, -Inf, crit, p_val, alpha)
+  }
+}
+
+# 4B. Test for Population Variance (sigma^2)
+my_test_variance <- function(s2, sigma0_sq, n, alpha = 0.05, alternative = "two.sided") {
+  stat <- ((n - 1) * s2) / sigma0_sq
+  df <- n - 1
+  
+  if (alternative == "two.sided") {
+    crit_low <- qchisq(alpha / 2, df = df)
+    crit_high <- qchisq(1 - alpha / 2, df = df)
+    p_val <- 2 * min(pchisq(stat, df = df), pchisq(stat, df = df, lower.tail = FALSE))
+    .test_decision(stat, crit_low, crit_high, p_val, alpha)
+  } else if (alternative == "less") {
+    crit_low <- qchisq(alpha, df = df)
+    p_val <- pchisq(stat, df = df)
+    .test_decision(stat, crit_low, Inf, p_val, alpha)
+  } else if (alternative == "greater") {
+    crit_high <- qchisq(1 - alpha, df = df)
+    p_val <- pchisq(stat, df = df, lower.tail = FALSE)
+    .test_decision(stat, -Inf, crit_high, p_val, alpha)
+  }
+}
+
+# 4C. Test for Population Proportion (p) - Large Sample Z-test
+my_test_proportion <- function(p_hat, p0, n, alpha = 0.05, alternative = "two.sided") {
+  # Note: Slide p. 51 uses p_hat*(1-p_hat) in denominator
+  se <- sqrt((p_hat * (1 - p_hat)) / n)
+  stat <- (p_hat - p0) / se
+  
+  if (alternative == "two.sided") {
+    crit <- qnorm(1 - alpha / 2)
+    p_val <- 2 * pnorm(-abs(stat))
+    .test_decision(stat, -crit, crit, p_val, alpha)
+  } else if (alternative == "less") {
+    crit <- qnorm(alpha)
+    p_val <- pnorm(stat)
+    .test_decision(stat, crit, Inf, p_val, alpha)
+  } else if (alternative == "greater") {
+    crit <- qnorm(1 - alpha)
+    p_val <- pnorm(stat, lower.tail = FALSE)
+    .test_decision(stat, -Inf, crit, p_val, alpha)
+  }
+}
+
+# 4D. Test for Equality of Two Means (mu1 - mu2)
+my_test_diff_means <- function(x1_bar, x2_bar, s1, s2, n1, n2, alpha = 0.05,
+                               alternative = "two.sided", known_var = FALSE, equal_var = TRUE) {
+  diff <- x1_bar - x2_bar
+  
+  if (known_var || (n1 + n2 > 30)) {
+    se <- sqrt((s1^2 / n1) + (s2^2 / n2))
+    stat <- diff / se
+    use_z <- TRUE
+    df <- Inf
+  } else if (equal_var) {
+    df <- n1 + n2 - 2
+    sp2 <- ((n1 - 1) * s1^2 + (n2 - 1) * s2^2) / df
+    se <- sqrt(sp2) * sqrt((1 / n1) + (1 / n2))
+    stat <- diff / se
+    use_z <- FALSE
+  } else {
+    v1 <- s1^2 / n1
+    v2 <- s2^2 / n2
+    df <- ((v1 + v2)^2) / ((v1^2 / (n1 + 1)) + (v2^2 / (n2 + 1))) - 2
+    se <- sqrt(v1 + v2)
+    stat <- diff / se
+    use_z <- FALSE
+  }
+  
+  if (alternative == "two.sided") {
+    crit <- if (use_z) qnorm(1 - alpha / 2) else qt(1 - alpha / 2, df = df)
+    p_val <- if (use_z) 2 * pnorm(-abs(stat)) else 2 * pt(-abs(stat), df = df)
+    .test_decision(stat, -crit, crit, p_val, alpha)
+  } else if (alternative == "less") {
+    crit <- if (use_z) qnorm(alpha) else qt(alpha, df = df)
+    p_val <- if (use_z) pnorm(stat) else pt(stat, df = df)
+    .test_decision(stat, crit, Inf, p_val, alpha)
+  } else if (alternative == "greater") {
+    crit <- if (use_z) qnorm(1 - alpha) else qt(1 - alpha, df = df)
+    p_val <- if (use_z) pnorm(stat, lower.tail = FALSE) else pt(stat, df = df, lower.tail = FALSE)
+    .test_decision(stat, -Inf, crit, p_val, alpha)
+  }
+}
+
+# 4E. Test for Equality of Two Variances (F-test)
+my_test_equality_variances <- function(s1_sq, s2_sq, n1, n2, alpha = 0.05,
+                                       alternative = "two.sided") {
+  stat <- s1_sq / s2_sq
+  df1 <- n1 - 1
+  df2 <- n2 - 1
+  
+  if (alternative == "two.sided") {
+    crit_low <- qf(alpha / 2, df1 = df1, df2 = df2)
+    crit_high <- qf(1 - alpha / 2, df1 = df1, df2 = df2)
+    p_val <- 2 * min(pf(stat, df1, df2), pf(stat, df1, df2, lower.tail = FALSE))
+    .test_decision(stat, crit_low, crit_high, p_val, alpha)
+  } else if (alternative == "less") {
+    crit_low <- qf(alpha, df1 = df1, df2 = df2)
+    p_val <- pf(stat, df1, df2)
+    .test_decision(stat, crit_low, Inf, p_val, alpha)
+  } else if (alternative == "greater") {
+    crit_high <- qf(1 - alpha, df1 = df1, df2 = df2)
+    p_val <- pf(stat, df1, df2, lower.tail = FALSE)
+    .test_decision(stat, -Inf, crit_high, p_val, alpha)
+  }
+}
+
+# 4F. Test for Equality of Two Proportions (p1 = p2)
+my_test_diff_proportions <- function(p1_hat, p2_hat, n1, n2, alpha = 0.05,
+                                     alternative = "two.sided") {
+  se <- sqrt((p1_hat * (1 - p1_hat) / n1) + (p2_hat * (1 - p2_hat) / n2))
+  stat <- (p1_hat - p2_hat) / se
+  
+  if (alternative == "two.sided") {
+    crit <- qnorm(1 - alpha / 2)
+    p_val <- 2 * pnorm(-abs(stat))
+    .test_decision(stat, -crit, crit, p_val, alpha)
+  } else if (alternative == "less") {
+    crit <- qnorm(alpha)
+    p_val <- pnorm(stat)
+    .test_decision(stat, crit, Inf, p_val, alpha)
+  } else if (alternative == "greater") {
+    crit <- qnorm(1 - alpha)
+    p_val <- pnorm(stat, lower.tail = FALSE)
+    .test_decision(stat, -Inf, crit, p_val, alpha)
+  }
+}
+
+# 5. NON-PARAMETRIC CHI-SQUARE TESTS (Goodness-of-Fit & Independence)
+
+# 5A. Chi-Square Goodness of Fit Test
+# Automatically groups adjacent classes with expected frequency < 5 if combine = TRUE
+my_chisq_gof <- function(observed, expected_probs, estimated_params = 0,
+                         alpha = 0.05, combine = TRUE) {
+  n <- sum(observed)
+  expected <- n * expected_probs
+  
+  # Combine adjacent classes where expected frequency < 5 (Slide p. 68)
+  if (combine) {
+    obs_c <- numeric()
+    exp_c <- numeric()
+    curr_o <- 0
+    curr_e <- 0
+    
+    for (i in seq_along(expected)) {
+      curr_o <- curr_o + observed[i]
+      curr_e <- curr_e + expected[i]
+      if (curr_e >= 5) {
+        obs_c <- c(obs_c, curr_o)
+        exp_c <- c(exp_c, curr_e)
+        curr_o <- 0
+        curr_e <- 0
+      }
+    }
+    # Merge any leftover tail < 5 into the last valid class
+    if (curr_e > 0 && length(exp_c) > 0) {
+      obs_c[length(obs_c)] <- obs_c[length(obs_c)] + curr_o
+      exp_c[length(exp_c)] <- exp_c[length(exp_c)] + curr_e
+    }
+    observed <- obs_c
+    expected <- exp_c
+  }
+  
+  k <- length(observed)
+  df <- k - estimated_params - 1
+  stat <- sum((observed - expected)^2 / expected)
+  crit <- qchisq(1 - alpha, df = df)
+  p_val <- pchisq(stat, df = df, lower.tail = FALSE)
+  
+  list(
+    statistic = stat,
+    critical_value = crit,
+    df = df,
+    p_value = p_val,
+    grouped_observed = observed,
+    grouped_expected = expected,
+    decision = ifelse(stat >= crit, "Reject H0", "Accept H0")
+  )
+}
+
+# 5B. Chi-Square Test of Independence (Contingency Table Matrix)
+my_chisq_independence <- function(obs_matrix, alpha = 0.05) {
+  n <- sum(obs_matrix)
+  row_totals <- rowSums(obs_matrix)
+  col_totals <- colSums(obs_matrix)
+  
+  expected_matrix <- outer(row_totals, col_totals) / n
+  stat <- sum((obs_matrix - expected_matrix)^2 / expected_matrix)
+  
+  df <- (nrow(obs_matrix) - 1) * (ncol(obs_matrix) - 1)
+  crit <- qchisq(1 - alpha, df = df)
+  p_val <- pchisq(stat, df = df, lower.tail = FALSE)
+  
+  list(
+    statistic = stat,
+    critical_value = crit,
+    df = df,
+    p_value = p_val,
+    expected_frequencies = expected_matrix,
+    decision = ifelse(stat >= crit, "Reject H0 (Dependent)", "Accept H0 (Independent)")
+  )
+}
